@@ -1,0 +1,91 @@
+10) LPO CTC: Gross Pay + PF Employer Share + ESI Employer Share + Bonus 
+
+11) Total days: Attendance
+
+12) Days Worked: Attendance
+
+13) AL: Attendance
+
+15) PL: Attendance
+
+16) BL/ML: Attendance
+
+17) LOP: Attendance
+
+18) Days Paid: Total Days - LOP
+
+19) Consile Salary: It will check Actual CTC Without Loss Of Pay, then apply these conditions (J2: Actual CTC Without Loss Of Pay)
+
+| CTC Range      | Formula Applied        | Meaning                                                                                                 |
+| -------------- | ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| < ₹15,285      | `J2 / 1.1758`          | High deduction ratio (e.g., entry-level with fewer benefits)                                            |
+| ₹15,285–23,757 | `J2 / 1.1638`          | Slightly better ratio                                                                                   |
+| ₹23,758–34,298 | `J2 / 1.1313`          | Mid-level employee benefits factored                                                                    |
+| ≥ ₹34,299      | `(J2 - 1800) / 1.0833` | Higher slabs; subtracts ₹1,800 (likely a fixed component like food coupons or insurance), then converts |
+| Else           | `"Error"`              | Catch-all if data is wrong                                                                              |
+
+20) Basic: It will check the Consile Salary, then apply these conditions (S2: Consile Salary)
+
+| Consolidated Salary (`S2`)  |                       Basic Salary Formula |                      Output                     |
+| ---------------------------                       | --------------------                                        | --------------------------------------- |
+| ₹30,000 or more                             | Fixed at ₹15,000                                  | `=15000`                                |
+| Between ₹13,001 and ₹29,999   | 40% of Consolidated                         | `=S2 × 40%`                             |
+| Less than ₹13,000                        | 50% of Consolidated                         | `=S2 × 50%`                             |
+| Exactly ₹13,000                            | Returns `"Error"`                            | Because it's not `> 13000` or `< 13000` |
+
+21) HRA: Basic * 40%
+
+24) O_ALW1: Consile Salary - (Basic + HRA + CCA + TRP_ALW)
+
+25) LOP2: Consile Salary / Total Days then * LOP 
+
+26) BASIC3: BASIC / Total Days then * Days Paid
+
+27) HRA4: HRA / Total Days then * Days Paid
+
+28) CCA5: CCA / Total Days then * Days Paid
+
+29) TRP_ALW6: TRP_ALW / Total Days then * Days Paid
+
+30) O_ALW17: O_ALW1 / Total Days then Days Paid
+
+31) Gross Pay: BASIC3 + HRA4 + CCA5 + TRP_ALW6 + O_ALW17
+
+33) PF: BASIC3 - 12%
+
+34) ESI: It will check the ESI based on the conditions (S2: Consile Salary, AE2: Gross Pay, AF2: PLB)
+
+| Condition                                             | Result                                                                      |            
+| -----------------------------                          | ----------------------------------------                             |
+| Consolidated Salary > ₹21,000 | ₹0 (not eligible for ESI deduction)         |
+| ≤ ₹21,000                                               | 0.75% of (Gross Pay + PLB) as ESI amount |
+
+35) PT:It will check the PT based on the conditions (AE2: Gross Pay)
+
+| **Gross Pay (AE2)**                | **Condition**                                    | **Result** |
+| -------------------------                       | ---------------------------                             | ----------           |
+| Greater than ₹20,000              | `AE2 > 20000`                                      | ₹200               |
+| Between ₹15,001 – ₹20,000     | `AE2 > 15000` and `<=20000`      | ₹150               |
+| ₹15,000 or less                          | `AE2 <= 15000`                                   | ₹100               |
+
+36) TDS: ?????
+
+37) GPAP: (Consile Salary * 12 * 5 * 0.12) / 100 then / 12
+
+38) Oth Deds: some 0 some 500 
+
+39) NET_PAY: (Gross Pay + PLB) - (PF + ESI + PT + TDS + GPAP + Oth Deds)
+
+40) PF Employer Share: BASIC3 * 12%
+
+41) ESI Employer Share: It will check the ESI Employer Share based on the conditions (S2: Consile Salary, AE2: Gross Pay, AF2: PLB)
+
+| Condition                              |  Result                                                                                                                       |
+| ----------------                             | -------------------------------------------------------------                                                  |
+| If `S2 > 21,000`                  | Not ESI eligible → return `0`                                                                       |
+| If `S2 ≤ 21,000`                  | Return `3.25%` of (`AE2 + AF2`) → employer's ESI contribution |
+
+42) Bonus: Gross Pay * 8.33%
+
+
+
